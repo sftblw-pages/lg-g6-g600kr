@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Google Play 추가 설치 — G600KR 한 대에서 확인한 절차와 근거입니다."><meta name="color-scheme" content="light"><title>Google Play 추가 설치 · G600KR Archive</title><link rel="stylesheet" href="style.css"></head>
+<body><a class="screenreader" href="#main">본문으로 이동</a><header><a href="index.html">G600KR / ARCHIVE</a><nav aria-label="주 메뉴"><a href="guide.html">설치 순서</a><a href="downloads.html">다운로드</a><a href="gapps.html">Google Play</a><a href="worklog.html">작업 기록</a><a href="kernel.html">커널 빌드</a></nav></header><main id="main" class="shell"><section class="hero"><div class="eyebrow">G600KR / Google Play 추가 설치</div></section><div class="layout"><aside class="side"><nav aria-label="주 메뉴"><a href="guide.html">설치 순서</a><a href="downloads.html">다운로드</a><a href="gapps.html">Google Play</a><a href="worklog.html">작업 기록</a><a href="kernel.html">커널 빌드</a></nav></aside><article class="article"><div class="toc"><span class="toctitle">이 문서의 순서</span><ul>
+<li><a href="#_1">사용한 파일</a></li>
+<li><a href="#_2">이미 첫 부팅을 마친 경우</a></li>
+<li><a href="#_3">첫 부팅과 확인</a></li>
+</ul>
+</div>
+<h1 id="google-play">Google Play 추가 설치</h1>
+<p>2026-10-05, Wi-Fi 수정을 마친 이 G600KR에 <strong>MindTheGapps를 추가하고 Play 스토어 실행·실제 앱 다운로드와 설치까지 확인</strong>했습니다. ROM이나 수정 boot를 다시 기록하지 않았고, 기존 커널과 Wi-Fi 파일은 그대로 유지됐습니다.</p>
+<p>대상은 앞에서 설치한 LineageOS 21 / Android 14 / ARM64와 H870 TWRP 3.5.2_10-0 조합입니다. Google 앱 없이도 LineageOS는 사용할 수 있습니다.</p>
+<p>아래 명령은 <a href="https://github.com/sftblw-pages/lg-g6-g600kr/archive/refs/tags/gapps-2026-10-05.zip">Google 앱 안내가 추가된 안내·도구 ZIP</a>을 풀거나 최신 저장소를 받은 폴더에서 실행합니다. 기존 기본 릴리스의 안내 ZIP에는 이 추가 문서와 설치 파일 해시 목록이 없습니다.</p>
+<h2 id="_1">사용한 파일</h2>
+<ul>
+<li><code>MindTheGapps-14.0.0-arm64-20250203_200051.zip</code></li>
+<li>431,524,182바이트 (약 431.52MB)</li>
+<li>SHA-256: <code>6e1c3616862ce5b33e2b96074f86ae846eb1351a26a980e1ed140f8a7e7a4fd6</code></li>
+<li><a href="https://github.com/sftblw-pages/lg-g6-g600kr/releases/tag/gapps-2026-10-05">이 기록의 보존 릴리스</a></li>
+<li><a href="https://github.com/sftblw-pages/lg-g6-g600kr/releases/download/gapps-2026-10-05/MindTheGapps-14.0.0-arm64-20250203_200051.zip">보존 ZIP 다운로드</a></li>
+<li><a href="https://github.com/MindTheGapps/14.0.0-arm64/releases/tag/MindTheGapps-14.0.0-arm64-20250203_200051">MindTheGapps 공식 원본</a></li>
+</ul>
+<p>기본 16개 파일을 받는 <code>tools/release_files.py</code>에는 이 선택 패키지가 포함되지 않습니다. 별도로 내려받아 검사합니다.</p>
+<pre><code class="language-powershell">Get-FileHash ../g6-files/MindTheGapps-14.0.0-arm64-20250203_200051.zip -Algorithm SHA256
+</code></pre>
+<h2 id="_2">이미 첫 부팅을 마친 경우</h2>
+<p><a href="https://github.com/LineageOS/lineage_wiki/blob/main/pages/gapps.md">LineageOS 공식 안내</a>는 Google 앱을 ROM 설치 직후, 첫 Android 부팅 전에 설치하도록 설명합니다. <strong>이미 GApps 없이 부팅했다면 factory reset 후 설치해야 합니다.</strong> 이 실험도 이미 초기 설정을 마친 상태여서 앱·설정 데이터를 초기화했습니다.</p>
+<p>필요한 사용자 파일은 먼저 별도로 백업합니다. 아래 boot·system 백업은 사용자 데이터 백업이 아닙니다. Android에서 TWRP로 재부팅한 뒤 <code>adb devices</code>에서 <strong>실제 G6의 recovery 시리얼</strong>을 확인합니다. Android와 TWRP의 시리얼 접두부는 다를 수 있습니다.</p>
+<pre><code class="language-powershell">adb -s &quot;현재 Android G6 시리얼&quot; reboot recovery
+adb devices -l
+$G6 = &quot;현재 TWRP G6 시리얼&quot;
+adb -s $G6 shell getprop ro.twrp.version
+</code></pre>
+<p>TWRP 3.5.2_10-0과 대상 기기를 확인합니다. System이 마운트돼 있으면 TWRP Mount 메뉴에서 해제한 뒤 현재 정상 상태를 PC에 백업합니다. 아래 도구는 크기와 기기·PC의 전체 SHA-256을 대조합니다. system은 약 5.86GB이므로 전송에 시간이 걸릴 수 있습니다.</p>
+<pre><code class="language-powershell">python tools/backup_partition.py --serial $G6 --partition boot --output ../private-backups/boot-before-gapps.img
+python tools/backup_partition.py --serial $G6 --partition system --output ../private-backups/system-before-gapps.img
+</code></pre>
+<p>둘 다 <code>BACKUP_VERIFIED</code>인지 확인합니다. 본인 기기의 boot 백업 해시를 읽고, 실제 실험의 검사를 일반화한 읽기 전용 스크립트로 기기·ROM·커널·Wi-Fi 상태를 먼저 확인합니다.</p>
+<pre><code class="language-powershell">$G6BootHash = (Get-Content ../private-backups/boot-before-gapps.img.json -Raw | ConvertFrom-Json).sha256
+adb -s $G6 push scripts/gapps-verify.sh /tmp/gapps-verify.sh
+adb -s $G6 shell sh /tmp/gapps-verify.sh $G6 $G6BootHash --before
+</code></pre>
+<p><code>GAPPS_DEVICE_PREFLIGHT_PASSED</code>가 나온 경우에만 ZIP을 전송합니다.</p>
+<pre><code class="language-powershell">adb -s $G6 push ../g6-files/MindTheGapps-14.0.0-arm64-20250203_200051.zip /tmp/g6-gapps.zip
+adb -s $G6 shell sha256sum /tmp/g6-gapps.zip
+adb -s $G6 shell twrp remountrw
+</code></pre>
+<p>기기의 ZIP 해시가 위 공식 값과 같아야 합니다. 이 실험은 system 여유 약 3.2GiB, <code>/tmp</code> 약 1.8GiB, 사용 가능한 RAM 약 3.4GiB에서 진행했습니다. 설치기는 ZIP을 RAM에 풀기 때문에 system 공간만 충분하다고 판단하지 않습니다.</p>
+<p><strong>TWRP 화면 재구성이 끝난 뒤</strong>, 다음 명령으로 앱·설정을 초기화합니다. 이 <code>wipe data</code>는 <code>/data/media</code>를 보존했고 cache도 포맷했습니다. 전체 내부 저장소를 지우는 <code>format data</code>와 구분합니다.</p>
+<pre><code class="language-powershell">adb -s $G6 shell twrp wipe data
+</code></pre>
+<p>초기화의 <code>Done</code>과 오류 없는 종료를 확인한 다음 설치합니다. 그 사이 Android로 부팅하지 않습니다.</p>
+<pre><code class="language-powershell">adb -s $G6 shell twrp install /tmp/g6-gapps.zip
+adb -s $G6 pull /tmp/recovery.log ../private-backups/recovery-after-gapps.log
+</code></pre>
+<p>이 기기에서는 installer RC=0과 <code>Done!</code>을 확인했습니다. 설치기는 파일 복사 실패를 모두 종료 코드로 처리하지 않으므로 로그와 실제 파일을 함께 확인해야 합니다. 아래 해시 목록은 G6에 설치되는 36개 파일을 담고 있습니다. G6에서 제거되는 Pixel Tablet용 파일과 설치 중 생성되는 addon.d 스크립트는 목록에 포함하지 않습니다.</p>
+<pre><code class="language-powershell">adb -s $G6 push downloads/gapps-installed-files.sha256 /tmp/gapps-installed-files.sha256
+adb -s $G6 shell sh /tmp/gapps-verify.sh $G6 $G6BootHash
+</code></pre>
+<p>36개 파일이 모두 <code>OK</code>이고 마지막에 <code>GAPPS_FILE_PERMISSIONS_VERIFIED</code>와 <code>GAPPS_FILES_BOOT_AND_WIFI_VERIFIED</code>가 나와야 합니다. 파일 소유권·권한·SELinux 표기, 생성된 addon.d 스크립트, 설치 전후 boot 전체 및 Wi-Fi 5개 파일의 동일성을 함께 검사합니다. 검사 실패 시 재부팅하지 말고 TWRP 상태에서 원인을 확인합니다. 기존 ROM 재설치는 Wi-Fi 수정까지 덮어쓸 수 있으므로 무작정 재설치하지 않습니다.</p>
+<h2 id="_3">첫 부팅과 확인</h2>
+<pre><code class="language-powershell">adb -s $G6 reboot
+</code></pre>
+<ul>
+<li>이 실기에서는 OS 변경 경고와 LG 로고를 거쳐 초기 설정으로 진행했습니다. 경고 자체가 성공을 보장하지 않으며, 반복되거나 전원이 꺼지면 실제 부팅 상태를 확인해야 합니다.</li>
+<li>Wi-Fi와 Google 계정 설정은 휴대폰에서 직접 진행합니다. 초기 설정의 ‘휴대전화 준비 중’에 시간이 걸릴 수 있습니다.</li>
+<li><strong>‘Lineage 복구 모드를 OS와 함께 업데이트’는 체크 해제하여 TWRP를 유지합니다.</strong></li>
+<li>필요한 경우 USB 디버깅을 다시 허용합니다. 이번 사후 확인에는 루트 디버깅이 필요하지 않았습니다.</li>
+<li>Play 스토어 실행과 자동 업데이트를 PC에서 확인했고, 소유자가 실제 앱 다운로드·설치 성공을 확인했습니다. Wi-Fi 인터넷도 다시 검증했습니다.</li>
+</ul>
+<p>Google Play 설치가 모든 앱의 기기 인증·DRM·무결성 검사를 통과한다는 뜻은 아닙니다. 이 실험에서는 Google 음성 서비스의 초기 부팅 오류 한 건이 관찰됐으며 음성 합성 기능은 따로 검증하지 않았습니다. 한국어 입력기는 이 ROM에 기본 제공되지 않았고 추가 키보드 앱은 설치하지 않았습니다.</p></article></div></main><footer><div>실기 확인 2026-10-04–05 · 개인 실험 기록 · LG / LineageOS / TeamWin의 공식 배포가 아닙니다.<br>AI 작성·정리: OpenAI Codex · GPT-6 Astra (<code>gpt-6-astra</code>)<br><a href="https://github.com/sftblw-pages/lg-g6-g600kr">GitHub 저장소</a> · <a href="notice.html">작성 정보·출처와 권리</a> · <a href="https://github.com/sftblw-pages/lg-g6-g600kr/releases/tag/g600kr-2026-10-05">고정 릴리스</a></div></footer></body></html>

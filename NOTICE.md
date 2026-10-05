@@ -18,6 +18,7 @@ AI 작성 표기는 이 사이트의 설명과 기록에 관한 것입니다. �
 | TWRP 3.5.2_10-0 H870 | 위 XDA 안내에서 연결한 LG 보존 배포본. TeamWin 및 해당 기기 유지보수자 작업 |
 | 수정 커널 | [rainbowdashh/android_kernel_lge_msm8996](https://github.com/rainbowdashh/android_kernel_lge_msm8996/tree/7e7397d497cdbfc0deedb9295d54d755f799fdd8), 커밋 고정. 커널 전체 소스 아카이브와 사용한 설정·빌드·재포장 스크립트 제공. Linux COPYING은 `notices/Linux-COPYING`, 개별 소스의 라이선스 표기도 유지 |
 | Wi-Fi 파일 | G600KR20p 순정 system에서 추출한 5개 펌웨어/설정 파일. 기기 고유 NV 파티션 백업이 아님. LG/Broadcom 구성요소 |
+| 선택 Google 앱 | [MindTheGapps Android 14 ARM64 공식 릴리스](https://github.com/MindTheGapps/14.0.0-arm64/releases/tag/MindTheGapps-14.0.0-arm64-20250203_200051)의 ZIP을 수정 없이 보존. 패키징은 MindTheGapps 프로젝트, Google 앱은 Google의 독점 구성요소. 기본 펌웨어 릴리스와 별도 보관 |
 | su98 임시 루트 | [Karma2424 보존 저장소](https://github.com/Karma2424/cve2019-2215-3.18), Alexander R. Pruss의 3.18 수정, Google Project Zero의 Jann Horn·Maddie Stone 및 Grant Hernandez의 원작. 헤더 크레딧·원문 README·수정 소스·차이 패치 보존 |
 | LGUP CLI | [실제 참조한 배포 원문](https://plzking4me.tistory.com/117). LG 서명 Cmd 1.15.0.6 + Common 2.1.0.23, 원 패키지 ReadMe 포함 |
 | LG USB 드라이버 | LGMobileDriver WHQL 4.8.0, LG 서명 실행 파일 |

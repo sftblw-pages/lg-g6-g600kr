@@ -1,11 +1,12 @@
 # LG G6 G600KR → LineageOS 21
 
-LGM-G600KR 한 대에서 **분해 없이 ENG 부트로더 우회 → TWRP → Android 14 → Wi-Fi 인터넷 연결**까지 확인한 기록과 재현 자료입니다. 실기 확인: 2026-10-04~05.
+LGM-G600KR 한 대에서 **분해 없이 ENG 부트로더 우회 → TWRP → Android 14 → Wi-Fi 인터넷 연결 → Google Play 앱 설치**까지 확인한 기록과 재현 자료입니다. 실기 확인: 2026-10-04~05.
 
 - [설치 안내 사이트](https://sftblw-pages.github.io/lg-g6-g600kr/)
 - [파일 다운로드 / 고정 릴리스](https://github.com/sftblw-pages/lg-g6-g600kr/releases/tag/g600kr-2026-10-05)
 - [설치 순서](docs/GUIDE.md) · [전체 작업 기록](docs/WORKLOG.md) · [커널 재빌드](docs/KERNEL.md)
 - [파일 크기와 SHA-256](downloads/manifest.json) · [출처와 권리 안내](NOTICE.md)
+- [Google Play 추가 설치](docs/GAPPS.md) · [선택 Google 앱 보존 릴리스](https://github.com/sftblw-pages/lg-g6-g600kr/releases/tag/gapps-2026-10-05)
 
 ## AI 작성 안내
 
@@ -15,7 +16,7 @@ LGM-G600KR 한 대에서 **분해 없이 ENG 부트로더 우회 → TWRP → An
 
 **LGM-G600KR / KT / rev_11**, 안티롤백 APPSBL·SBL1·TZ·RPM 모두 0인 실기에서 확인했습니다. 모든 G6의 설치를 보장하지 않습니다. ENG 방식은 정식 언락 키 방식과 다르며 `LOCK STATE locked`가 남습니다. 데이터가 삭제되고, 부트로더 기록 실패 시 분해·EDL 복구가 필요할 수 있습니다.
 
-확인한 기능은 Android 14 부팅·초기 설정·ADB·Wi-Fi 검색·공유기 연결·DNS·인터넷 통신입니다. 통화·모바일 데이터·블루투스·카메라·장시간 안정성은 미검증입니다. 2026-05-01 보안 패치를 표기하는 비공식 ROM이며 최신 보안 지원을 의미하지 않습니다.
+확인한 기능은 Android 14 부팅·초기 설정·ADB·Wi-Fi 검색·공유기 연결·DNS·인터넷 통신과 Google Play 실행·앱 설치입니다. 통화·모바일 데이터·블루투스·카메라·장시간 안정성은 미검증입니다. 2026-05-01 보안 패치를 표기하는 비공식 ROM이며 최신 보안 지원을 의미하지 않습니다.
 
 ## 파일 받기
 

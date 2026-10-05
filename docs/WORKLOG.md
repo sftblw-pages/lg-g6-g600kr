@@ -208,3 +208,42 @@ Google SDK의 usb_driver_r13 패키지는 서명이 유효했지만 이 실험�
 
 
 
+
+## Google Play 추가 설치 — 2026-10-05
+
+소유자는 GApps가 없는 상태에서 이미 초기 설정을 완료했다. 공식 LineageOS 안내상 factory reset 후 설치해야 한다고 설명한 뒤 소유자가 설치를 요청했다. 연결된 실제 G6만 시리얼로 지정했으며 별도로 연결된 Android 에뮬레이터는 대상으로 삼지 않았다.
+
+실행 중인 ROM은 Android 14 / ARM64 / LineageOS 21.0-20260531-UNOFFICIAL-h870이었다. system에는 약 3.2GiB 여유가 있었고 Google Play 서비스·스토어는 설치되어 있지 않았다. [MindTheGapps 공식 Android 14 ARM64 릴리스](https://github.com/MindTheGapps/14.0.0-arm64/releases/tag/MindTheGapps-14.0.0-arm64-20250203_200051)의 원본 ZIP을 사용했다.
+
+- 파일: `MindTheGapps-14.0.0-arm64-20250203_200051.zip`
+- 크기: 431,524,182바이트
+- 공식 SHA-256: `6e1c3616862ce5b33e2b96074f86ae846eb1351a26a980e1ed140f8a7e7a4fd6`
+- ZIP CRC 및 PC·기기 전송 후 SHA-256 일치 확인.
+
+TWRP 3.5.2_10-0에 진입하여 정상 Wi-Fi 수정 상태의 boot 전체 41,943,040바이트와 system 전체 5,863,636,992바이트를 PC에 백업하고 기기의 SHA-256과 대조했다. system 원시 전송이 느려 읽기 클라이언트만 중단한 뒤 gzip 무손실 전송으로 전환했다. TWRP의 gzip이 ADB 출력을 터미널로 감지하여 `-f -c`가 필요했다. 작은 스트림의 압축·복원 검사를 통과한 다음 전체를 전송했고, 압축을 푼 원래 이미지의 크기와 해시가 일치했다. 백업은 공개 자료에 포함하지 않는다.
+
+- GApps 전 boot 전체 SHA-256: `40605caf7a45e851db3d9210edfb2153ff2d5ea78b0e0b03c764139420f53757`
+- GApps 전 system 전체 SHA-256: `beeb3bb847466f4b7682caf15d6aedac77dc5cecaa4830da07aaea979ac5bcd7`
+
+공식 installer를 읽어 ARM64 / SDK 34 / system-as-root / A-only 파티션 탐색과 여유 공간 조건을 확인했다. G6에서는 Pixel Tablet용 VelvetTitan을 제외하여 약 660MB 파일이 설치된다. boot·Wi-Fi vendor 파일을 변경하지 않는 설치 방식이므로 ROM을 다시 기록하지 않았다.
+
+`twrp remountrw` 후 메뉴 전환이 끝난 다음 `twrp wipe data`를 실행했다. 이는 앱·설정을 초기화하고 cache도 포맷했으며 `/data/media`는 보존했다. 이어 검증한 ZIP을 `/tmp`에서 `twrp install`로 설치했다. TWRP 로그는 19초 설치, updater RC=0, Done을 보고했다. 아직 마운트하지 않은 경로를 unmount하는 메시지는 있었지만 실제 `/mnt/system` 마운트와 파일 기록은 성공했다.
+
+설치 메시지와 별도로 실제 설치 대상 36개 파일의 SHA-256, 소유권 0:0, 권한 0644, SELinux `system_file` 표기를 모두 확인했다. 생성된 addon.d 스크립트는 0755였다. 기존 boot 전체와 Wi-Fi 5개 파일의 해시도 설치 전과 일치했다. system 여유 공간은 설치 후 약 2.66GiB였다. 검증 결과는 `GAPPS_FILE_PERMISSIONS_VERIFIED`, `GAPPS_FILES_BOOT_AND_WIFI_VERIFIED`였다.
+
+검증 후 Android로 재부팅했다. 소유자는 앞서 관찰된 것과 비슷한 OS 변경 경고 및 LG 로고를 거친 뒤 Google 초기 설정의 ‘휴대전화 준비 중’ 단계에 진입했다고 보고했다. 이어 아래와 같이 초기 설정 완료와 Play 스토어 실행·앱 설치를 확인했다.
+
+초기 설정 중 ‘Lineage 복구 모드를 OS와 함께 업데이트’ 항목은 TWRP 유지를 위해 체크 해제하도록 안내했다. 공식 LineageOS 21 SetupWizard 소스는 이 선택을 `persist.vendor.recovery_update`에 저장하며, 설정이 없을 때 기본값은 false다. 실제 런타임 조회에서도 이 속성은 설정되지 않은 상태였다. 루트 디버깅을 다시 켜거나 복구 파티션을 재기록하지 않았다.
+
+초기 설정 후 USB 디버깅을 다시 허용하여 다음을 확인했다.
+
+- `sys.boot_completed=1`, `device_provisioned=1`, `user_setup_complete=1`.
+- 일반 ADB는 uid=2000이며, Play 스토어·Google Play 서비스·Google Services Framework·Google SetupWizard 패키지가 존재한다.
+- Play 스토어는 `53.3.21-34 [0] [PR] 986224237`로 자동 업데이트되었다. system 원본 APK와 별도로 data에 업데이트가 설치된 상태다.
+- `com.android.vending/.AssetBrowserActivity`가 실제 최상위 화면으로 실행됐고 스토어 프로세스도 동작했다.
+- Android가 Wi-Fi에 VALIDATED를 표시했고 example.com DNS 조회 및 ping 2회가 패킷 손실 0%로 통과했다.
+- 소유자가 ‘구글플레이에서 앱 설치도 잘 되고 있음’이라고 확인했다. 계정 정보나 앱 구매는 PC에서 조작하지 않았다.
+
+초기 부팅의 제한된 crash 로그에는 Google 음성 서비스(com.google.android.tts)가 잠금 해제 전 credential-protected 데이터 접근에 실패한 기록 한 건이 있었다. 이 구간에 Play 스토어 충돌 기록은 없었고, 이후 스토어에서 실제 앱 설치는 성공했다. 음성 합성 기능 자체는 별도 검증하지 않았다.
+
+한국어 입력기는 기본 제공되지 않았으며 이번 실험에서는 추가 입력기를 설치하거나 활성화하지 않았다. Google Play 설치와 실제 앱 다운로드 성공 확인으로 작업을 마쳤다.

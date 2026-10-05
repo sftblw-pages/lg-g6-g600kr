@@ -1,0 +1,15 @@
+{
+  "version": "2026-10-05",
+  "tag": "gapps-2026-10-05",
+  "repository": "sftblw-pages/lg-g6-g600kr",
+  "optional": true,
+  "source_release": "https://github.com/MindTheGapps/14.0.0-arm64/releases/tag/MindTheGapps-14.0.0-arm64-20250203_200051",
+  "assets": [
+    {
+      "name": "MindTheGapps-14.0.0-arm64-20250203_200051.zip",
+      "size": 431524182,
+      "sha256": "6e1c3616862ce5b33e2b96074f86ae846eb1351a26a980e1ed140f8a7e7a4fd6",
+      "description": "선택 Google 앱 / Android 14 ARM64 / 실기 설치 확인"
+    }
+  ]
+}
