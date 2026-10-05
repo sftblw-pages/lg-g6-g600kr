@@ -1,0 +1,59 @@
+{
+  "original_sha256": "65918c945819636ade9051c57c751629bccb7002dc8c4fcd5efca91fe80c5820",
+  "public_sha256": "b8a4b91eaa4af6287bb34b2c46d762c79618a423350d557005e8ab1d709e54d9",
+  "size": 1388656,
+  "change": "Equal-length username masking in non-loaded DWARF debug sections",
+  "all_PT_LOAD_bytes_identical": true,
+  "patches": [
+    {
+      "offset": 779824,
+      "length": 5,
+      "section": ".debug_info"
+    },
+    {
+      "offset": 784539,
+      "length": 5,
+      "section": ".debug_info"
+    },
+    {
+      "offset": 980020,
+      "length": 5,
+      "section": ".debug_str"
+    },
+    {
+      "offset": 1014904,
+      "length": 5,
+      "section": ".debug_str"
+    },
+    {
+      "offset": 1135223,
+      "length": 5,
+      "section": ".debug_line"
+    },
+    {
+      "offset": 1135326,
+      "length": 5,
+      "section": ".debug_line"
+    },
+    {
+      "offset": 1135427,
+      "length": 5,
+      "section": ".debug_line"
+    },
+    {
+      "offset": 1135538,
+      "length": 5,
+      "section": ".debug_line"
+    },
+    {
+      "offset": 1135648,
+      "length": 5,
+      "section": ".debug_line"
+    },
+    {
+      "offset": 1135757,
+      "length": 5,
+      "section": ".debug_line"
+    }
+  ]
+}

@@ -24,6 +24,8 @@ python tools/release_files.py assemble --directory ../g6-files
 
 첫 명령은 약 4.11GB를 다운로드하고 검증합니다. 두 번째는 3개 조각을 약 2.81GB KDZ로 합친 뒤 원본 SHA-256을 확인합니다. 기기에 연결하거나 기록하지 않습니다. 파일·백업·작업 공간을 합쳐 PC에 최소 20GB 이상 여유를 권장합니다. 커널을 직접 빌드할 때는 추가 공간이 필요합니다.
 
+공개 임시 루트 바이너리만 비로드 디버그 정보의 PC 사용자 경로를 익명화했습니다. 실행되는 모든 PT_LOAD 바이트는 원본과 같습니다. [변경 검증 기록](downloads/su98-debug-anonymization.json)을 함께 제공합니다.
+
 ## 공개하지 않는 자료
 
 다른 사람의 `modemst*`, `fsg`, `persist`, `factory`, DRM 등 기기 고유 백업을 자신의 폰에 쓰면 안 됩니다. 이 저장소에는 실기 시리얼, Wi-Fi 접속 정보, NV 백업, 사용자 데이터, 원시 진단 로그를 포함하지 않습니다. 도구가 만들어 주는 `private-backups`와 Wi-Fi 복구용 stage도 공개하지 마세요.

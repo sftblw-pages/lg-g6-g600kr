@@ -65,8 +65,8 @@
     {
       "name": "g6-su98-local",
       "size": 1388656,
-      "sha256": "65918c945819636ade9051c57c751629bccb7002dc8c4fcd5efca91fe80c5820",
-      "description": "Android 8에서 사용한 임시 루트 바이너리"
+      "sha256": "b8a4b91eaa4af6287bb34b2c46d762c79618a423350d557005e8ab1d709e54d9",
+      "description": "임시 루트 공개본: 비로드 디버그 경로만 익명화, PT_LOAD 동일"
     },
     {
       "name": "kernel-source-7e7397d4.tar.gz",

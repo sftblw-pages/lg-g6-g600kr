@@ -49,6 +49,8 @@ adb -s $G6 shell uname -a
 
 사용한 바이너리는 CVE-2019-2215 기반이며 커널 메모리를 변경합니다. Android 9에서는 실패했고 위 Android 8에서 성공했습니다. 실패 시 멈추거나 재부팅될 수 있습니다. 무한 반복 실행하지 않습니다.
 
+공개 `g6-su98-local`은 원본의 **로드되지 않는 DWARF 디버그 정보에서 PC 사용자 경로만 같은 길이로 익명화**했습니다. ELF의 모든 PT_LOAD 구간은 바이트 단위로 동일합니다. 실행 코드·데이터는 변경하지 않았으며 공개본 해시는 다운로드 목록에 있습니다. 원본과 공개본의 차이는 `downloads/su98-debug-anonymization.json`과 `tools/make_public_su98.py`로 확인할 수 있습니다.
+
 ```powershell
 adb -s $G6 push ../g6-files/g6-su98-local /data/local/tmp/g6-su98-local
 adb -s $G6 shell chmod 700 /data/local/tmp/g6-su98-local
