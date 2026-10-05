@@ -7,6 +7,10 @@ LGM-G600KR 한 대에서 **분해 없이 ENG 부트로더 우회 → TWRP → An
 - [설치 순서](docs/GUIDE.md) · [전체 작업 기록](docs/WORKLOG.md) · [커널 재빌드](docs/KERNEL.md)
 - [파일 크기와 SHA-256](downloads/manifest.json) · [출처와 권리 안내](NOTICE.md)
 
+## AI 작성 안내
+
+이 웹사이트의 설명과 작업 기록은 **OpenAI Codex의 GPT-6 Astra (`gpt-6-astra`)**가 실험 로그와 사용자 보고를 바탕으로 작성·정리했습니다. 기기 소유자 sftblw가 휴대폰의 물리적 조작과 화면 확인을 수행했습니다. 모델 식별자는 작업 세션 기록에서 확인했습니다. 기존 펌웨어·ROM·복구 이미지 등 각 구성요소의 제작자와 출처는 [출처와 권리 안내](NOTICE.md)에 기록했습니다.
+
 ## 적용 범위
 
 **LGM-G600KR / KT / rev_11**, 안티롤백 APPSBL·SBL1·TZ·RPM 모두 0인 실기에서 확인했습니다. 모든 G6의 설치를 보장하지 않습니다. ENG 방식은 정식 언락 키 방식과 다르며 `LOCK STATE locked`가 남습니다. 데이터가 삭제되고, 부트로더 기록 실패 시 분해·EDL 복구가 필요할 수 있습니다.
