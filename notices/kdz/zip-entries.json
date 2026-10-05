@@ -1,0 +1,47 @@
+[
+  {
+    "name": "LG_G6_MG600KR_LGMG600KR_G600KR20P_00_1214/",
+    "size": 0,
+    "crc": "00000000"
+  },
+  {
+    "name": "LG_G6_MG600KR_LGMG600KR_G600KR20P_00_1214/Credits.txt",
+    "size": 260,
+    "crc": "219666fb"
+  },
+  {
+    "name": "LG_G6_MG600KR_LGMG600KR_G600KR20P_00_1214/Driver/",
+    "size": 0,
+    "crc": "00000000"
+  },
+  {
+    "name": "LG_G6_MG600KR_LGMG600KR_G600KR20P_00_1214/Driver/Download.url",
+    "size": 149,
+    "crc": "2280d9aa"
+  },
+  {
+    "name": "LG_G6_MG600KR_LGMG600KR_G600KR20P_00_1214/Flash Tool/",
+    "size": 0,
+    "crc": "00000000"
+  },
+  {
+    "name": "LG_G6_MG600KR_LGMG600KR_G600KR20P_00_1214/Flash Tool/Download.url",
+    "size": 149,
+    "crc": "e1af70cf"
+  },
+  {
+    "name": "LG_G6_MG600KR_LGMG600KR_G600KR20P_00_1214/LG_G6_MG600KR_LGMG600KR_G600KR20P_00_1214/",
+    "size": 0,
+    "crc": "00000000"
+  },
+  {
+    "name": "LG_G6_MG600KR_LGMG600KR_G600KR20P_00_1214/LG_G6_MG600KR_LGMG600KR_G600KR20P_00_1214/LGMG600KR_G600KR20P_00_1214.kdz",
+    "size": 2814394085,
+    "crc": "afa7648a"
+  },
+  {
+    "name": "LG_G6_MG600KR_LGMG600KR_G600KR20P_00_1214/Official Website.url",
+    "size": 128,
+    "crc": "c0c0c4e3"
+  }
+]

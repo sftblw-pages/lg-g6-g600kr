@@ -1,0 +1,22 @@
+{
+  "fw_bcmdhd.bin": {
+    "sha256": "96e909eb2080ae518b52c34a1a195baa94f0b9478a685a2b53adbccfd11b47af",
+    "size": 602533
+  },
+  "fw_bcmdhd_apsta.bin": {
+    "sha256": "96e909eb2080ae518b52c34a1a195baa94f0b9478a685a2b53adbccfd11b47af",
+    "size": 602533
+  },
+  "fw_bcmdhd_mfg.bin": {
+    "sha256": "f8879b2d35cca360746b34c6e60c3a4e145d6d465d18d58951ec1a8af48f00b6",
+    "size": 578232
+  },
+  "bcmdhd.cal": {
+    "sha256": "ccc13dfab7cf7c1025ba13b6cedc38255e210218619bef91d5083c505e2e7bde",
+    "size": 5893
+  },
+  "4359_lg.clm_blob": {
+    "sha256": "831a21ba21842cccd681d0b79045441c8902b36adbb65f93bbcf5fd8940a69d4",
+    "size": 9396
+  }
+}

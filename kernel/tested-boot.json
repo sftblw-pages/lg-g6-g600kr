@@ -1,0 +1,17 @@
+{
+  "original_sha256": "0db389f0d9223d6b4aa4e0a60e3c2c2bbc0b1bfb29e1d773ef4bd2aea47cd05f",
+  "output_sha256": "cbf044c07b499c4a3f94e587131e92d3c61b83946f2b6809e4477cd32f859eb5",
+  "output_size": 17653760,
+  "kernel_gzip_size": 10629000,
+  "preserved_dtbs_size": 5793035,
+  "preserved_dtbs_sha256": "974007cacf088b56f5b963997991dc58391994ee1f78a211272d1b1fb82fa7f0",
+  "preserved_ramdisk_sha256": "5d68d45e78ff380eeb46f91b92223cc0bfb4cd8945f46153758fa73544809210",
+  "header_changes": [
+    "kernel_size",
+    "image_id"
+  ],
+  "boot_partition_size": 41943040,
+  "source_commit": "7e7397d497cdbfc0deedb9295d54d755f799fdd8",
+  "compiler": "Ubuntu clang 14 + LLD 14",
+  "device_test": "PASS: customkernel boot_completed1, wlan0, scan21AP, userWiFiassociation, IP3/3 and DNS/domain2/2, AndroidVALIDATED"
+}

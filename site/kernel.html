@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="커널 재빌드 — G600KR 한 대에서 확인한 절차와 근거입니다."><meta name="color-scheme" content="light"><title>커널 재빌드 · G600KR Archive</title><link rel="stylesheet" href="style.css"></head>
+<body><a class="screenreader" href="#main">본문으로 이동</a><header><a href="index.html">G600KR / ARCHIVE</a><nav aria-label="주 메뉴"><a href="guide.html">설치 순서</a><a href="downloads.html">다운로드</a><a href="worklog.html">작업 기록</a><a href="kernel.html">커널 빌드</a></nav></header><main id="main" class="shell"><section class="hero"><div class="eyebrow">G600KR / 커널 재빌드</div></section><div class="layout"><aside class="side"><nav aria-label="주 메뉴"><a href="guide.html">설치 순서</a><a href="downloads.html">다운로드</a><a href="worklog.html">작업 기록</a><a href="kernel.html">커널 빌드</a></nav></aside><article class="article"><div class="toc"><span class="toctitle">이 문서의 순서</span><ul>
+<li><a href="#_1">정확한 입력</a></li>
+<li><a href="#linux-wsl">Linux / WSL 빌드</a></li>
+<li><a href="#imagegz">왜 Image.gz만 사용하는가</a></li>
+<li><a href="#_2">임시 루트 소스</a></li>
+</ul>
+</div>
+<h1 id="wi-fi">Wi-Fi 수정 커널과 재포장</h1>
+<h2 id="_1">정확한 입력</h2>
+<ul>
+<li>공개 소스: <code>rainbowdashh/android_kernel_lge_msm8996</code>, 커밋 <code>7e7397d497cdbfc0deedb9295d54d755f799fdd8</code>.</li>
+<li>Releases의 <code>kernel-source-7e7397d4.tar.gz</code>가 실제 빌드에 사용한 전체 아카이브입니다. 소스 파일은 수정하지 않고 설정을 변경했습니다.</li>
+<li>원본 ROM 설정: <code>kernel/rom-original.config</code>.</li>
+<li>사용한 입력 설정: <code>kernel/g600kr-wifi-only.config</code>.</li>
+<li>olddefconfig 이후 실제 확정 설정: <code>kernel/g600kr-wifi-resolved.config</code>.</li>
+<li>변경은 BCMDHD_LEGACY / BCM43455 → BCMDHD_EXT / BCM4359 및 해당 종속 항목입니다. H870 모뎀 보정과 커널 명령행은 유지했습니다.</li>
+<li>Ubuntu의 Clang 14 + LLD 14, 병렬 작업 2개로 빌드했습니다. 이 오래된 트리는 임의의 최신 컴파일러와 호환된다고 보장하지 않습니다.</li>
+</ul>
+<h2 id="linux-wsl">Linux / WSL 빌드</h2>
+<p>호스트에 Clang/LLVM/LLD 14, make, GCC/G++, flex, bison, libssl 개발 파일, libelf 개발 파일, bc, Python 3를 준비합니다. Ubuntu에서는 <code>clang-14 llvm-14 lld-14 build-essential flex bison libssl-dev libelf-dev bc python3</code> 패키지에 해당합니다. 버전과 배포판에 따라 의존성 패키지 이름은 달라질 수 있습니다.</p>
+<p>경로는 예시입니다. Linux 파일시스템에 소스와 출력을 두는 것이 좋습니다.</p>
+<pre><code class="language-sh">mkdir -p &quot;$PWD/local/kernel-src&quot;
+tar -xzf ../g6-files/kernel-source-7e7397d4.tar.gz --strip-components=1 -C &quot;$PWD/local/kernel-src&quot;
+export PATH=&quot;/usr/lib/llvm-14/bin:$PATH&quot;
+sh kernel/build.sh &quot;$PWD/local/kernel-src&quot; &quot;$PWD/local/kernel-out&quot;
+python3 kernel/repack.py \
+  --original ../g6-files/boot-lineage-original.img \
+  --kernel local/kernel-out/arch/arm64/boot/Image.gz \
+  --output local/boot-rebuilt.img
+</code></pre>
+<p><code>local/kernel-out</code>에는 기존 <code>.config</code>가 없어야 합니다. 스크립트는 기존 설정을 덮어쓰지 않습니다. ARM64 vDSO 링크에 호스트 GNU ld가 선택되면 실패할 수 있어 <code>-fuse-ld=lld -Qunused-arguments</code>를 지정했습니다.</p>
+<p>실제 실험에서 만든 <code>g600kr-wifi-Image.gz</code>도 Releases에 보존했습니다. 이것을 <code>--kernel</code>에 넣어 재포장하면 배포 중인 <code>boot-g600kr-wifi.img</code>와 동일한 SHA-256을 확인할 수 있습니다. 새로 컴파일한 커널은 빌드 시간·환경 등에 따라 바이너리 해시가 달라질 수 있습니다.</p>
+<h2 id="imagegz">왜 Image.gz만 사용하는가</h2>
+<p>원래 ROM boot의 커널 gzip 뒤에는 DTB 5,793,035바이트가 붙어 있습니다. 재포장은 <strong>커널 gzip만 교체하고 원래 DTB와 램디스크를 보존</strong>합니다. 새 빌드의 Image.gz-dtb를 통째로 넣지 않습니다.</p>
+<p>LG 호환 v0 boot의 ID는 kernel, ramdisk, 빈 second stage, 빈 별도 DT 필드의 크기를 모두 SHA-1에 반영합니다. 원본 이미지에서 공식을 먼저 검증합니다. 헤더의 kernel_size와 image_id 외 바이트가 바뀌지 않았는지도 검사합니다.</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>검증값</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>최종 boot 크기</td>
+<td>17,653,760바이트</td>
+</tr>
+<tr>
+<td>최종 boot SHA-256</td>
+<td><code>cbf044c07b499c4a3f94e587131e92d3c61b83946f2b6809e4477cd32f859eb5</code></td>
+</tr>
+<tr>
+<td>보존 DTB SHA-256</td>
+<td><code>974007cacf088b56f5b963997991dc58391994ee1f78a211272d1b1fb82fa7f0</code></td>
+</tr>
+<tr>
+<td>보존 램디스크 SHA-256</td>
+<td><code>5d68d45e78ff380eeb46f91b92223cc0bfb4cd8945f46153758fa73544809210</code></td>
+</tr>
+</tbody>
+</table>
+<p>정확한 소스·설정·스크립트가 있어도 전체 LineageOS ROM의 비트 단위 재현을 보장하지 않습니다. ROM의 빌드 시점과 커널 소스 공개 시점은 달랐습니다. 최종 boot의 실기 확인 범위는 <code>kernel/tested-boot.json</code>과 전체 작업 기록에 남겼습니다.</p>
+<h2 id="_2">임시 루트 소스</h2>
+<p><code>src/g6-su98-local.c</code>와 업스트림 대비 <code>src/su98-local.patch</code>를 제공합니다. 실제 바이너리는 Zig 0.14.1의 aarch64-linux-musl 정적 빌드로 만들었습니다. 원작자 표기는 소스 헤더와 NOTICE에 보존했습니다. 커널 심볼 캐시를 끄고 readlink의 NUL 종료와 출력 처리를 보완했습니다.</p>
+<pre><code class="language-sh">zig cc -target aarch64-linux-musl -static -O2 src/g6-su98-local.c -o g6-su98-local
+</code></pre>
+<p>위는 재빌드 명령 형태이며, 도구 환경·링커 메타데이터 차이로 배포 바이너리와 같은 해시가 나온다는 보장은 없습니다. 배포 바이너리의 정확한 해시는 manifest에 있습니다. 이 취약점 시험은 소유·관리 권한이 있는 대상 기기에서만 수행합니다.</p></article></div></main><footer><div>실기 확인 2026-10-04–05 · 개인 실험 기록 · LG / LineageOS / TeamWin의 공식 배포가 아닙니다.<br><a href="https://github.com/sftblw-pages/lg-g6-g600kr">GitHub 저장소</a> · <a href="notice.html">출처와 권리</a> · <a href="https://github.com/sftblw-pages/lg-g6-g600kr/releases/tag/g600kr-2026-10-05">고정 릴리스</a></div></footer></body></html>

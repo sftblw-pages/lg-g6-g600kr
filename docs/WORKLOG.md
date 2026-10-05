@@ -1,0 +1,210 @@
+# LG G6 G600KR 부트로더 우회와 LineageOS 작업 기록
+
+2026년 10월 4일부터 사용하지 않는 LGM-G600KR 한 대에서 진행한 실험 기록이다. Android 9에서 Android 8로 내린 뒤 임시 루트를 얻고, 분해 없이 ENG aboot와 LAF를 기록해 Fastboot와 TWRP 실행까지 확인했다. **10월 5일 LineageOS 21 / Android 14의 실제 부팅과 초기 설정에 성공했고, ADB의 부팅 완료 플래그도 확인했다.** Wi-Fi 드라이버의 기종 차이를 수정한 커널로도 부팅했고, 주변 AP 검색·공유기 연결·DNS·인터넷 통신까지 성공했다.
+
+이 문서는 모든 G6에 적용되는 설치 보증이 아니다. 기록 중인 방식은 정식 언락 키로 잠금 플래그를 해제하는 방식과 다르다. ENG 부트로더가 부팅 검증 일부를 우회하며, 실제 Fastboot 화면에는 `SECURE BOOT enabled`, `LOCK STATE locked`가 남았다. 잘못된 부트로더 기록은 분해 후 EDL 복구가 필요한 고장으로 이어질 수 있다.
+
+## 기기와 시작 상태
+
+| 항목 | 확인 결과 |
+| --- | --- |
+| 물리 기종 | LGM-G600KR, KT, 하드웨어 rev_11 |
+| Android에서 보고하는 모델 | LGM-G600K, device lucye |
+| 시작 펌웨어 | G600KR30c, Android 9, 보안 패치 2019-05-01 |
+| 시작 커널 | 3.18.120-perf+ |
+| 구버전 설치 후 | G600KR20p, Android 8.0.0, 보안 패치 2018-12-01 |
+| 구버전 커널 | 3.18.71-perf+, 2018-12-14 빌드 |
+| 안티롤백 실기 조회 | APPSBL(LK), SBL1, TZ, RPM 모두 0 |
+| 보존 데이터 | 소유자가 보존할 데이터 없음 확인 |
+
+안티롤백 값은 기본 전화 앱에서 `*#546368#*600#` 입력 후 `SVC Menu → Version Info → Anti-rollback Version`에서 소유자가 직접 읽었다. 빈 Android 속성 값을 안티롤백 0으로 간주하지 않았다.
+
+## 단계별 실제 결과
+
+| 단계 | 실제 결과 |
+| --- | --- |
+| Android 9에서 ADB 연결 | 최초 MTP 상태에서 연결 문제. USB 구성을 MIDI로 바꾸고 디버깅 허용 후 연결 |
+| Android 9에서 EDL 및 부트로더 재부팅 | 일반 부팅으로 돌아옴. 9008 또는 Fastboot 미진입 |
+| 수동 다운로드 모드 | 전원 끄기, 볼륨 올림을 누른 채 USB 연결로 Firmware Update 진입 |
+| LG USB 드라이버 | LG 서명 4.8.0 설치 후 다운로드 모드 COM 포트 연결 |
+| 기존 LAF를 통한 원본 읽기 | 6개 LUN의 기본 GPT만 읽힘. 비영점 오프셋 읽기 및 일부 LUN은 0x80000119 거부 |
+| Android 9 임시 루트 | CVE-2019-2215 기반 su98 초기 메모리 누출 단계에서 3회 실패 |
+| G600KR20p 설치 | LGUP REFURBISH, 안티롤백 PASS, 100%, Download Complete, 종료 코드 0 |
+| Android 8 실제 부팅 | 초기 설정 완료 후 ADB로 빌드·커널 확인. 이 환경에서는 mtp,adb도 정상 연결 |
+| Android 8 임시 루트 | 같은 바이너리로 uid=0 획득. 각 작업 뒤 SELinux Enforcing 복구 |
+| 원본 백업 | 51개 파티션과 7개 기본 GPT, 약 522 MB. 58개 이미지 SHA-256 및 7개 GPT CRC 검증 |
+| ENG 파일 검증 | aboot ELF 세그먼트 해시·인증서 체인·Qualcomm HMAC RSA 서명, LAF AVB1 서명 모두 검증 |
+| ENG 적용 첫 실행 | 쓰기 전 중단. mksh 기본 hash 별칭과 함수 이름 충돌. 파티션 변경 없음 |
+| ENG 적용 수정 실행 | 함수명을 image_sha256으로 바꿈. laf, aboot 순서로 기록하고 전체 파티션 SHA-256 재확인 성공 |
+| ENG 적용 뒤 재부팅 | adb reboot bootloader 실행 후 Fastboot 화면 진입. 분해·테스트포인트·EDL 사용 없음 |
+| Windows Fastboot 연결 | USB VID_18D1, PID_D00D 드라이버 코드 28. Microsoft 카탈로그 Google 드라이버 설치 후 정상 연결 |
+| Fastboot 읽기 명령 | product msm8996 32GB, secure yes, unlocked no, oem device-info 응답 확인 |
+| TWRP 임시 부팅 | 전송 OKAY, bootimage: incomplete or not signed로 거부 |
+| TWRP 파티션 기록 | 소유자의 구체적 승인 후 fastboot flash recovery 실행. 전송과 기록 모두 OKAY |
+| Fastboot에서 recovery 재부팅 | 명령은 OKAY였으나 실제로는 일반 Android 잠금 화면으로 돌아옴 |
+| 일반 부팅 후 recovery 검사 | 원본 순정 recovery와 앞 29,095,128바이트가 일치. 뒤쪽 잔여 데이터 때문에 전체 파티션 해시는 원본과 달랐음 |
+| TWRP 재기록 | 임시 루트에서 동일 이미지를 recovery에 기록. 34,856,960바이트를 다시 읽어 입력 SHA-256과 일치 확인. SELinux 복구 후 adb reboot recovery 실행 |
+| TWRP 실제 실행 | 소유자가 TWRP 로고와 암호 창 확인. ADB recovery 상태, ro.twrp.version 3.5.2_10-0, uid=0, 커널 3.18.140-perf 확인 |
+| 순정 data 복호화 | 기본 암호 시도에서 dm-crypt mapping table 생성 오류. 암호 불일치 문구만으로 잘못된 PIN이라고 판단하지 않고 Cancel 안내 |
+| LineageOS 설치 | TWRP updater script 성공, boot 이미지 17,571,840바이트 읽기 해시 일치 |
+| 설치된 system 조회 | Android 14 / SDK 34 / LineageOS 21.0-20260531-UNOFFICIAL-h870 / 보안 패치 표기 2026-05-01 |
+| LineageOS 실제 부팅 | 초기 설정 후 ADB 재연결. sys.boot_completed=1, bootanim=stopped, Android 14 / LineageOS 21 / 커널 4.4.302-perf+ 확인 |
+| 기본 ROM의 Wi-Fi | 목록 없음. 커널이 PCI vendor 14e4 / device 4415를 미지원으로 거부하며 드라이버 로드 실패 |
+| 수정 후 Wi-Fi | BCM4359 커널 부팅, wlan0 생성, AP 21개 검색, 소유자 공유기 연결, DNS 및 인터넷 통신 성공 |
+| 기타 하드웨어 | 베이스밴드 버전은 보고되지만 통화·데이터·블루투스·카메라 등 실사용 검증은 별도 |
+
+## LineageOS 설치 준비
+
+[개발자 Rainbow_Dash의 ENG 대응 설명](https://xdaforums.com/t/guide-lg-g6-bootloader-unlock-2025.4772845/page-5#post-90611082)에서 연결한 배포 폴더에서 `lineage-21.0-20260531-UNOFFICIAL-h870-BLMOD.zip`을 확보했다. Android 14 / LineageOS 21 시험 빌드이며 H870에서 부팅·통화가 보고된 것이다. G600KR의 전체 기능이 검증된 배포본은 아니다.
+
+ZIP은 968,057,157바이트이며 내부 모든 파일의 CRC 검사를 통과했다. SHA-256은 `7ecb0c0d4a47fc9b748177eaccf93db2f423cdbe28838ed68041041627c9a774`이다. 설치 스크립트의 파티션 기록 대상은 system과 boot이고, 동봉된 recovery.img는 해당 스크립트에서 기록하지 않는다. system 요구 크기 5,863,636,992바이트는 실기 파티션 크기와 같으며, boot 이미지는 17,571,840바이트로 실기 41,943,040바이트에 들어간다.
+
+실기 TrustZone 문자열은 `TZ.BF.4.0.1-176180`, 설치 스크립트의 최대 허용 조건은 `TZ.BF.4.0.1-194871`이다. 크기와 버전 조건 확인은 실제 부팅 성공의 증거와 구분한다.
+
+커널 내장 설정을 추출해 Wi-Fi 차이를 확인했다. H870 빌드는 BCM43455 / BCMDHD_LEGACY 설정이고, 이 기기의 순정 보정 파일은 BCM4359용이다. 같은 공개 소스의 US997 설정은 BCM4359 / BCMDHD_EXT이다. 또한 ENG용 모뎀 보정은 H870 모델명과 통신사 코드를 사용한다. 따라서 이 ROM의 첫 부팅이 성공해도 G600KR의 Wi-Fi·모뎀까지 동작한다고 간주하지 않는다. 순정 Wi-Fi·블루투스 펌웨어를 별도로 PC에 보존했다.
+
+첫 설치에 앞서 TWRP에서 순정 system 전체 5,863,636,992바이트를 PC로 추가 백업했다. 앞서 만든 58개 이미지 백업과 별도의 시점이다. 기기와 PC의 전체 SHA-256이 `1e6ad2fdbf0a746dbe4187af33b57526220a655abe75ab7465fb524c2a6f451e`로 일치했다. adb exec-out의 dd 상태 출력이 뒤에 붙은 92바이트는 크기 검사로 검출했고, 출력 분리를 수정한 뒤 정확한 파티션 길이에 대해 전체 해시를 검증했다.
+
+보존할 데이터가 없다는 소유자의 기존 지시에 따라 `twrp format data`를 실행했다. mke2fs와 e2fsdroid RC=0, Done을 확인했다. TWRP가 재부팅 필요 가능성을 안내했고 실제 /data 마운트가 되지 않아 `adb reboot recovery`로 복구 모드를 다시 시작했다. 재시작 후에는 /dev/block/sda16이 /data에 ext4로 정상 마운트됐고 약 23GB를 사용할 수 있었다.
+
+재부팅으로 지워진 /tmp의 ROM을 다시 전송하고 해시를 검사했다. `twrp remountrw` 직후 이어 보낸 첫 설치 명령은 TWRP 화면 재구성 중 FIFO open에서 대기했다. 로그에 설치 시작이 없고 해당 CLI 프로세스가 fifo_open 상태인 것을 확인해 그 클라이언트만 종료했다. recovery 본체는 종료하지 않았다. 전환이 끝난 다음 `twrp install /tmp/g6-lineage21.zip`을 다시 실행해 정상적으로 설치했다.
+
+설치 로그에서 TrustZone 비교 통과와 `script succeeded: result was [1.000000]`을 확인했다. boot 파티션에서 이미지 길이 17,571,840바이트를 다시 읽은 SHA-256은 원본 boot.img와 같은 `0db389f0d9223d6b4aa4e0a60e3c2c2bbc0b1bfb29e1d773ef4bd2aea47cd05f`였다. system을 읽기 전용으로 열어 Android 14와 LineageOS 21 속성을 확인한 뒤 `adb reboot`로 첫 부팅을 시작했다. 실제 Android 화면 진입과 무선 기능 검증은 별도 단계다.
+
+Android 9에서의 임시 루트 실패만으로 모든 G600KR의 해당 버전이 패치됐다고 단정할 수는 없다. 이 실험에서는 Android 8 구버전으로 변경한 뒤 성공했다.
+
+## 순정 펌웨어 확보와 LGUP
+
+LG 펌웨어 사이트의 CAPTCHA가 작동하지 않아 [AndroidFileHost 배포 파일](https://androidfilehost.com/?fid=17825722713688290866)을 사용했다. 추출한 `G600KR20P_00_1214.kdz`의 MD5를 [별도 LG 펌웨어 목록](https://lg-firmwares.com/downloads-file/17445/G600KR20P_00_1214)과 대조했다.
+
+KDZ 내부 DZ의 모델명은 LGM-G600K이며, G600KR용 배포 파일임을 별도 해시로 확인했다. 현재 기기의 sda부터 sdf까지 6개 LUN 파티션 위치는 펌웨어 GPT와 일치했다. xbl, xbl2, aboot, tz, rpm 인증서의 SW_ID 상위 32비트는 모두 0이었다.
+
+[G6에서 LGUP 명령행 도구를 사용한 원문](https://plzking4me.tistory.com/117)의 배포 패키지 중 LGUP_Cmd.exe 1.15.0.6과 LGUP_Common.dll 2.1.0.23만 사용했다. 두 파일 모두 LG Electronics의 유효한 Authenticode 서명을 확인했다. 원문의 통신사 변경은 따라 하지 않고, G600KR용 순정 KDZ만 지정했다.
+
+이 실험에서 사용한 명령의 형태는 다음과 같다. 경로는 예시이며 포트 번호는 매번 실기 확인이 필요하다.
+
+```text
+LGUP_Cmd.exe com3 "C:\작업폴더\LGUP_Common.dll" "C:\작업폴더\G600KR20P_00_1214.kdz"
+```
+
+PowerShell에서 경로 따옴표가 생략된 첫 호출은 `SW_PATH is null`로 종료됐다. 따옴표를 유지한 CMD 호출은 기본 REFURBISH로 진행되어 userdata를 초기화했다. 초기 콘솔의 `Selected Port : COM0`과 달리 DLL 상세 로그에서 `Port Open 3`, 실제 G600KR 모델 및 올바른 KDZ를 확인했다. 콘솔 출력은 버퍼링되어 늦게 나타났으므로 `LOG/_COM0.log`의 실제 기록 상황을 확인했다. **COM0 표시만 보고 실행 중인 기록을 중단해서는 안 된다.**
+
+## 임시 루트와 백업
+
+기반 소스는 [cve2019-2215-3.18 보존 저장소](https://github.com/Karma2424/cve2019-2215-3.18)이다. 커널 심볼 캐시 재사용을 끄고, readlink 결과의 NUL 종료 및 출력 버퍼 처리를 보완한 소스를 Zig 0.14.1로 aarch64-linux-musl 정적 빌드했다. 바이너리를 임시 디렉터리에 전송해 실행했다.
+
+권한 확인에 사용한 명령의 형태는 다음과 같다. `<기기시리얼>`은 공유본에서 가린 값이다.
+
+```text
+adb -s <기기시리얼> push g6-su98-local /data/local/tmp/g6-su98-local
+adb -s <기기시리얼> shell chmod 700 /data/local/tmp/g6-su98-local
+adb -s <기기시리얼> shell '/data/local/tmp/g6-su98-local "id; getenforce; setenforce 1; getenforce"'
+```
+
+실제 출력은 `uid=0(root)`, `Permissive`, `Enforcing` 순서였다. 임시 프로세스가 끝난 뒤 일반 ADB는 다시 uid=2000이었다. 루트 획득 자체로 부트로더가 해제되는 것은 아니다.
+
+원본 백업은 순정 20p 설치 이후 읽은 것이다. 부팅 관련 파티션 외에 modemst1, modemst2, fsg, fsc, persist, factory 등 기기 고유 설정도 보존했다. system, userdata, cache는 제외했으며, 실행 중인 기기의 백업이라 전체 저장장치를 같은 순간에 동결한 스냅샷은 아니다. **이 고유 설정 백업은 공유 자료에 포함하지 않는다.**
+
+## ENG 이미지 검사와 적용
+
+방식의 출처는 [LG G6 Bootloader Unlock 2025 원문](https://xdaforums.com/t/guide-lg-g6-bootloader-unlock-2025.4772845/)이다. 원문은 QFIL로 ENG aboot와 LAF를 쓰며, G600KR 성공 사례도 있다. 본 실험은 임시 루트에서 같은 두 파티션을 직접 기록했다는 차이가 있다.
+
+사용자가 원문에서 직접 내려받아 제공한 eng.zip에서 실제 사용할 두 이미지는 ZIP CRC 검사를 통과했다. 동봉된 별도 `G600L_eng.Zip`는 CRC 오류가 있었으며 사용하지 않았다. aboot와 laf는 추가로 암호학적 서명 검증을 통과했다.
+
+aboot는 원본과 HW_ID `0005F0E100310000`, OEM_ID `0031`, MODEL_ID `0000`, SW_ID `0000000000000009`가 같았다. SW_ID 하위 값 9는 이미지 유형이며 안티롤백 버전 9가 아니다. LG 루트 인증서도 원본과 동일했다. LAF는 `/laf` 대상의 AVB1 서명과 원본과 같은 인증서를 확인했다.
+
+실제 적용 스크립트는 기종·펌웨어·대상 크기·원본 백업 해시·현재 파티션 해시·입력 해시를 모두 검사했다. LAF를 먼저 기록해 다시 읽어 검사한 뒤 aboot를 기록하고 다시 검사했다. abootbak와 lafbak는 변경하지 않았다. 실패 시 시도한 파티션을 원본으로 복구하는 절차를 넣었으나, 전원 단절이나 하드웨어 오류까지 복구할 수 있다는 의미는 아니다.
+
+소유자가 ENG 두 파티션의 영구 변경과 부팅 실패 시 분해 EDL 복구 가능성을 명시 승인한 후 진행했다. 성공 로그는 다음과 같다.
+
+```text
+ALL_PREFLIGHT_CHECKS_PASSED
+LAF_WRITE_READBACK_VERIFIED
+ABOOT_WRITE_READBACK_VERIFIED
+ENG_APPLY_COMPLETE_NO_REBOOT
+Enforcing
+```
+
+이후 `adb reboot bootloader`로 Fastboot 화면에 들어갔다. ENG 부트로더 때문에 USB 시리얼의 모델 접두부가 G600LR 형태로 보였지만, 공유본에서는 고유 시리얼을 기록하지 않는다.
+
+## 사용 파일의 SHA256
+
+```text
+G600KR20P_00_1214.kdz
+5218561668c0efa58907fc667d9d4e3dfaec012e7f22d2e2d72f7fce8e06e1af
+
+g6-su98-local
+65918c945819636ade9051c57c751629bccb7002dc8c4fcd5efca91fe80c5820
+
+eng.zip
+d920cd482b511742766ac93f3f11f66d43477b900d90734e618cba1f5773663a
+
+ENG aboot.img
+bac7b2809e60cfcb695f0b4afcdfff016b395d546cbd29f36be38696410242f9
+
+ENG laf.img
+43e43e6e88223237a0be1e13e50c12c504336e0f6ddac61248d2aac03f78afcd
+
+twrp-3.5.2_10-0-h870.img
+e0c4134402fcd1697cc7395eb22a0ee2742837c933995898340e75cafabd6667
+```
+
+파일명만 같다고 같은 파일로 판단하지 않는다. 위 해시는 이 실험에서 실제 사용한 파일의 값이며, 다른 배포 파일의 호환성을 보장하지 않는다.
+
+## 복구 모드 진입에서 확인한 점
+
+Windows Fastboot 통신을 확립했고 TWRP 기록 명령도 성공했다. 다만 fastboot reboot recovery는 이 기기에서 일반 부팅으로 이어졌고, 부팅 후 읽은 recovery의 앞부분은 순정 이미지와 같았다. 전체 파티션 해시만 비교하면 뒤에 남은 TWRP 데이터 때문에 이 복원을 놓칠 수 있었다.
+
+동일 TWRP를 임시 루트에서 다시 기록하고 이미지 길이만큼 읽어 SHA-256 일치를 확인한 뒤, adb reboot recovery를 실행했다. 이번에는 소유자가 TWRP 로고와 암호 입력 화면을 확인했고, PC에서 ADB recovery 상태와 TWRP 3.5.2_10-0, uid=0을 확인했다. 임시 fastboot boot 거부, 파티션 쓰기 성공, 실제 TWRP 부팅 성공은 각각 별도로 기록한다.
+
+TWRP에서 보이는 LG_H870, omni_h870은 사용한 복구 이미지의 속성이다. 물리 기종이 H870으로 바뀐 것이 아니다. 당시 순정 data는 block 암호화 상태였으며, 기본 암호 복호화 과정에서 dm-crypt 장치 생성이 실패했다. 순정 Android로 돌아가면 recovery가 다시 복원될 수 있어, 이후에는 TWRP에서 백업과 LineageOS 설치를 이어 진행했다.
+
+## 첫 부팅 이후 확인
+
+소유자는 세 점이 움직이는 LineageOS 부팅 애니메이션을 확인했고, 이어 시작 화면 또는 홈 화면까지 나왔다고 응답했다. PC에서도 새 ROM의 USB VID_18D1 / PID_4EE1 장치가 나타났다. data 초기화로 사라진 USB 디버깅 허용을 다시 진행한 뒤 ADB로 연결됐다. 실행 중인 기기에서 sys.boot_completed=1, init.svc.bootanim=stopped, Android 14, LineageOS 21.0-20260531-UNOFFICIAL-h870, 커널 4.4.302-perf+를 확인했다.
+
+소유자는 Wi-Fi 목록이 보이지 않는다고 보고했다. LineageOS의 루트 디버깅을 켜고 읽은 커널 로그에는 `dhdpcie_chipmatch: Unsupported vendor 14e4 device 4415`와 드라이버 로드 실패가 반복됐다. Android 쪽 로그도 Driver ready 시간 초과와 Wi-Fi HAL 시작 실패를 보였다. 공개 소스의 bcmdhd_ext는 0x4415를 BCM43596_D11AC_ID로 정의하고 실제 칩 매칭 경로에서 허용한다.
+
+수정 작업은 [공개 커널 소스의 lineage-21 커밋](https://github.com/rainbowdashh/android_kernel_lge_msm8996/commit/7e7397d497cdbfc0deedb9295d54d755f799fdd8)을 고정해 진행한다. 설치된 ROM에서 추출한 설정과 비교했을 때 Wi-Fi 드라이버를 BCMDHD_EXT / BCM4359로 바꾸는 항목 및 종속 항목만 변경했다. 모뎀·부팅 명령행 설정은 이 시험에서 유지한다. 원래 ROM의 램디스크와 DTB를 보존하고 커널 압축 부분만 교체하도록 재포장 스크립트를 준비했다. clang 14와 LLD 14로 빌드에 성공했고 아래와 같이 시험 이미지를 적용했다.
+
+현재 정상 부팅하는 LineageOS boot 전체 41,943,040바이트와 교체 예정 무선 파일도 별도 백업해 실기·PC 해시 일치를 확인했다. boot 전체 SHA-256은 `7fb5a1d54123f5a53a5c1c5840ec34df6364d5bcf87cf4fee4893a9762bd942b`이다. TWRP 이미지도 읽기 해시가 설치 시 값과 같았다.
+
+로컬 커널 빌드 중 WSL 응답이 멈춰 소유자의 승인 후 Ubuntu 배포판만 종료했다. 재시작은 HCS_E_CONNECTION_TIMEOUT 오류를 반환했다. 당시 C: 여유 공간이 약 2.2GB여서, 보존된 순정 KDZ의 SHA-256을 다시 검증하고 중복 바깥 ZIP과 KDZ에서 추출한 DZ만 정리해 약 7.8GB를 확보했다. ZIP의 크레딧·링크·목록은 보존했으며 KDZ, 기기 고유 백업, ROM, 사용자가 제공한 ENG 원본은 유지했다. 이후 소유자가 Docker 중단을 포함한 WSL 전체 재시작을 승인했다. 일반 종료도 지연되어 관리자 권한으로 Microsoft 서명을 확인한 WSL 관리 서비스를 재시작했고 Ubuntu의 정상 응답을 확인했다. 소스·빌드 파일은 보존됐으며 병렬 작업 수를 2로 줄여 컴파일을 재개했다. 재시작 후 C: 여유 공간은 약 24.6GB로 회복됐다. 이 PC 환경 복구 과정에서 추가로 기록한 폰 파티션은 없다.
+
+## G600KR Wi-Fi 수정 커널 시험
+
+빌드는 공개 소스 커밋 `7e7397d497cdbfc0deedb9295d54d755f799fdd8`과 설치 ROM에서 추출한 설정을 기반으로 했다. 설치 ROM 자체가 빌드된 시점과 소스가 공개된 시점은 다르므로 원본 바이너리의 완전한 재현이라고 주장하지 않는다. 최종 설정 차이는 BCMDHD_LEGACY / BCM43455 대신 BCMDHD_EXT / BCM4359를 선택하는 것과 그 종속 항목이다. 모뎀 및 명령행 보정 설정은 기준 ROM의 값을 유지했다.
+
+첫 컴파일은 ARM64 vDSO 링크에 호스트 GNU ld가 선택되어 중단됐다. clang 명령에 `-fuse-ld=lld -Qunused-arguments`를 명시한 뒤 해결했다. 앞서 기록한 WSL 복구 이후 병렬 작업 수 2로 전체 컴파일과 링크가 종료 코드 0으로 완료됐다.
+
+새 boot 이미지는 커널 gzip 부분만 교체하고 원본의 DTB 5,793,035바이트와 램디스크를 그대로 유지했다. 헤더도 커널 크기와 이미지 ID만 변경했다. 이 원본 LG v0 이미지의 ID는 빈 second-stage 및 별도 DT 필드의 크기를 모두 해시에 넣는 방식이어서, 원본으로 계산식을 검증한 뒤 재포장했다.
+
+- 시험 boot 크기: 17,653,760바이트; 실제 boot 파티션 41,943,040바이트 이내.
+- 시험 boot SHA-256: `cbf044c07b499c4a3f94e587131e92d3c61b83946f2b6809e4477cd32f859eb5`.
+- 보존한 DTB SHA-256: `974007cacf088b56f5b963997991dc58391994ee1f78a211272d1b1fb82fa7f0`.
+- 보존한 램디스크 SHA-256: `5d68d45e78ff380eeb46f91b92223cc0bfb4cd8945f46153758fa73544809210`.
+
+기본 LineageOS에서 복구 모드로 재부팅하는 동안 소유자가 OS 변경에 관한 경고 문구를 보고했다. 정확한 g.co 링크는 확인하지 못했으나 LG 로고 다음 TWRP가 실행됐고 PC에서도 recovery ADB를 확인했다. 이 경고는 새 커널을 쓰기 전에 발생했다.
+
+TWRP 임시 메모리에 시험 이미지, 순정 무선 파일 및 복구용 백업을 전송했다. 첫 사전 검사에서는 SHA256SUMS의 Windows 줄바꿈 때문에 파일명을 찾지 못해 쓰기 전에 중단됐다. LF로 고친 뒤 모든 입력 파일, 기기 시리얼, TWRP 버전, 배터리, 파티션 크기, ENG aboot, 현재 boot 전체, 기존 Wi-Fi 파일 및 TWRP 이미지 해시를 확인하는 읽기 전용 검사를 통과했다.
+
+실제 기록에서는 system 안의 `fw_bcmdhd.bin`, `fw_bcmdhd_apsta.bin`, `fw_bcmdhd_mfg.bin`, `bcmdhd.cal`, `4359_lg.clm_blob`을 이 G600KR의 순정 20p에서 보존한 파일로 적용했다. 각각 읽기 해시가 일치한 뒤 boot를 마지막에 기록했고 17,653,760바이트 읽기 해시도 시험 이미지와 일치했다. 오류 시 기존 파일과 boot 전체를 복구하는 절차를 준비했다. bootloader, modem, NV 파티션은 이 Wi-Fi 수정에서 변경하지 않았다.
+
+기록 결과는 `STOCK_G600_WIFI_FILES_READBACK_VERIFIED`, `WIFI_KERNEL_READBACK_VERIFIED_NO_REBOOT`였다. 이어 재부팅한 실기에서 sys.boot_completed=1, bootanim=stopped와 새 커널 4.4.302-perf / 2026-10-05 빌드 시각을 확인했다. 이전에는 없던 wlan0이 생성됐고 Wi-Fi가 켜졌다. 드라이버는 순정 펌웨어 9.87.55.16과 CLM 9.11.5.LGE를 읽었으며, 실제 AP 검색 결과 21개를 반환했다. 빌드한 커널에서 다시 추출한 설정도 검토한 최종 설정과 일치했다. 공유기 이름과 주소는 이 기록에서 제외했다. 소유자가 휴대폰에서 직접 공유기 연결을 마쳤고, 이어 wlan0 상태 up, 외부 IP 3회와 example.com DNS 조회·통신 2회 모두 패킷 손실 0%를 확인했다. Android 연결 관리자도 Wi-Fi에 VALIDATED를 표시했다. 휴대폰 날짜도 2026-10-05 KST로 동기화됐다. Wi-Fi 비밀번호는 PC나 대화에 입력받지 않았다.
+
+## 최종 확인 범위
+
+이 한 대의 G600KR에서는 분해·EDL 없이 ENG 부트로더 우회, TWRP 실행, LineageOS 21 / Android 14 부팅·초기 설정, 직접 빌드한 BCM4359 커널을 통한 Wi-Fi 인터넷 연결까지 확인했다. 정식 언락 키로 잠금 플래그를 푼 방식은 아니다. 통화·모바일 데이터·블루투스·카메라·장시간 안정성은 별도 실사용 검증이 필요하며, 다른 G6 변형 기종의 성공을 보장하지 않는다.
+
+WSL 복구 뒤 Docker 데몬도 정상 응답하는 것을 확인했다. 공유 대상은 이 기록이며, 기기 고유 파티션 백업과 원시 진단 로그는 포함하지 않는다.
+
+## Fastboot 드라이버 해결
+
+Google SDK의 usb_driver_r13 패키지는 서명이 유효했지만 이 실험의 PID_D00D가 INF에 없었다. 따라서 INF 수정이나 서명 검사 해제를 하지 않고, [Microsoft Update 카탈로그의 정확한 하드웨어 ID 검색](https://www.catalog.update.microsoft.com/Search.aspx?q=VID_18D1%26PID_D00D)에서 Google, Inc. Android Bootloader Interface를 선택했다.
+
+사용한 카탈로그 항목 ID는 76f2c233-6100-4a64-8bee-113c2da0991d, INF 버전은 2016-08-28 / 11.0.0.0이다. USB VID_18D1 PID_D00D가 x86과 amd64 항목에 포함돼 있고 Microsoft Windows Hardware Compatibility Publisher 서명이 유효했다. 관리자 권한으로 pnputil /add-driver android_winusb.inf /install을 실행해 설치했으며 실제 Fastboot 장치 상태가 OK로 바뀌었다.
+
+카탈로그 CAB의 SHA-256은 4e89f4519cd3c82ceda4676ccf1fb1a2be2d4213e756309ca2ff43b2fcc32e73이다.
+
+
+

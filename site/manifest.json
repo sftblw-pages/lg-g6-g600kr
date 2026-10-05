@@ -1,0 +1,108 @@
+{
+  "version": "2026-10-05",
+  "tag": "g600kr-2026-10-05",
+  "repository": "sftblw-pages/lg-g6-g600kr",
+  "reassembled_kdz": {
+    "name": "G600KR20P_00_1214.kdz",
+    "size": 2814394085,
+    "sha256": "5218561668c0efa58907fc667d9d4e3dfaec012e7f22d2e2d72f7fce8e06e1af"
+  },
+  "assets": [
+    {
+      "name": "G600KR20P_00_1214.kdz.part01",
+      "size": 1073741824,
+      "sha256": "5126222e32eaedd9aa5ce0ce684bfdee32ce8334e8b4d27cff888dfd421b7844",
+      "description": "G600KR20p 순정 KDZ 분할 파일 1/3"
+    },
+    {
+      "name": "G600KR20P_00_1214.kdz.part02",
+      "size": 1073741824,
+      "sha256": "1e942afe4e8f5b471118c700fe2dd01db2224356cba56df50807899dd2d564a0",
+      "description": "G600KR20p 순정 KDZ 분할 파일 2/3"
+    },
+    {
+      "name": "G600KR20P_00_1214.kdz.part03",
+      "size": 666910437,
+      "sha256": "a033b61c086ab0e8aa10feca94258c32ed9fd3f196be61702360e7b72b4389e8",
+      "description": "G600KR20p 순정 KDZ 분할 파일 3/3"
+    },
+    {
+      "name": "lineage-21.0-20260531-UNOFFICIAL-h870-BLMOD.zip",
+      "size": 968057157,
+      "sha256": "7ecb0c0d4a47fc9b748177eaccf93db2f423cdbe28838ed68041041627c9a774",
+      "description": "LineageOS 21 / Android 14 ENG 대응 ROM"
+    },
+    {
+      "name": "aboot.img",
+      "size": 2097152,
+      "sha256": "bac7b2809e60cfcb695f0b4afcdfff016b395d546cbd29f36be38696410242f9",
+      "description": "검증한 ENG aboot"
+    },
+    {
+      "name": "laf.img",
+      "size": 50331648,
+      "sha256": "43e43e6e88223237a0be1e13e50c12c504336e0f6ddac61248d2aac03f78afcd",
+      "description": "검증한 ENG LAF"
+    },
+    {
+      "name": "twrp-3.5.2_10-0-h870.img",
+      "size": 34856960,
+      "sha256": "e0c4134402fcd1697cc7395eb22a0ee2742837c933995898340e75cafabd6667",
+      "description": "실기 실행을 확인한 TWRP"
+    },
+    {
+      "name": "boot-g600kr-wifi.img",
+      "size": 17653760,
+      "sha256": "cbf044c07b499c4a3f94e587131e92d3c61b83946f2b6809e4477cd32f859eb5",
+      "description": "G600KR BCM4359 Wi-Fi 수정 boot"
+    },
+    {
+      "name": "boot-lineage-original.img",
+      "size": 17571840,
+      "sha256": "0db389f0d9223d6b4aa4e0a60e3c2c2bbc0b1bfb29e1d773ef4bd2aea47cd05f",
+      "description": "해당 LineageOS ZIP의 원본 boot"
+    },
+    {
+      "name": "g6-su98-local",
+      "size": 1388656,
+      "sha256": "65918c945819636ade9051c57c751629bccb7002dc8c4fcd5efca91fe80c5820",
+      "description": "Android 8에서 사용한 임시 루트 바이너리"
+    },
+    {
+      "name": "kernel-source-7e7397d4.tar.gz",
+      "size": 158144006,
+      "sha256": "2685aa44a34ccb0576907b7d12f9a18afe95c447f6d19a739da48719699ebf5b",
+      "description": "수정 커널의 고정 커밋 전체 소스"
+    },
+    {
+      "name": "g600kr-wifi-Image.gz",
+      "size": 10629000,
+      "sha256": "9c5ff5210b19de49a19e0b6fe2f948cb293a8fb2a490e8d64f36b6ec5a37f6bb",
+      "description": "실기 검증 boot에 사용한 커널 gzip"
+    },
+    {
+      "name": "LGMobileDriver_WHQL_Ver_4.8.0.exe",
+      "size": 20211408,
+      "sha256": "2b0b3dadbd35fe4cbd15b262196b082e561c8587d40d97e0fae3789d1777afe8",
+      "description": "LG 서명 USB 드라이버 4.8.0"
+    },
+    {
+      "name": "g6-fastboot-google-catalog.cab",
+      "size": 8582621,
+      "sha256": "4e89f4519cd3c82ceda4676ccf1fb1a2be2d4213e756309ca2ff43b2fcc32e73",
+      "description": "Microsoft 카탈로그 PID_D00D Fastboot 드라이버"
+    },
+    {
+      "name": "LGUP-Cmd-1.15.0.6-Common-2.1.0.23.zip",
+      "size": 2647792,
+      "sha256": "8dfb640b05a2a2d6830bcb9681c435a262afd44d672e1c73dbd2ee001e1dcf9b",
+      "description": "실제 사용한 LGUP CLI와 DLL; 원문 ReadMe 포함"
+    },
+    {
+      "name": "g600kr20p-wifi-files.zip",
+      "size": 1106223,
+      "sha256": "9f1ef510290da973d13e129fb79ce8e149116eb0d9b48b72851bf4b1d3964182",
+      "description": "G600KR20p의 5개 공용 Wi-Fi 펌웨어/설정 파일"
+    }
+  ]
+}
